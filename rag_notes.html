@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RAG Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Kalam:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#fbf7ec;
+    --paper-edge:#f2ecd8;
+    --line:#c9d9e8;
+    --margin:#e2a3a3;
+    --ink:#20304a;
+    --ink2:#1c3d5a;
+    --red:#a8362c;
+    --green:#2f6b3f;
+    --highlight:rgba(255,222,89,.55);
+    --highlight2:rgba(255,150,150,.35);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:#d9d3c1;
+    font-family:'Kalam',cursive;
+    color:var(--ink);
+    padding:40px 0 80px;
+  }
+  .page{
+    max-width:820px;
+    margin:0 auto 36px;
+    background:var(--paper);
+    background-image:
+      repeating-linear-gradient(var(--paper) 0px, var(--paper) 33px, var(--line) 34px),
+      linear-gradient(90deg, transparent 78px, var(--margin) 79px, var(--margin) 80px, transparent 81px);
+    background-size: 100% 34px, 100% 100%;
+    position:relative;
+    padding:36px 40px 36px 100px;
+    box-shadow: 0 8px 0 var(--paper-edge), 0 10px 18px rgba(0,0,0,.25);
+    border-radius: 2px;
+  }
+  .page::before{
+    content:'';
+    position:absolute; left:24px; top:0; bottom:0;
+    width:1px;
+  }
+  .holes{
+    position:absolute; left:36px; top:0; bottom:0;
+    display:flex; flex-direction:column; justify-content:space-evenly;
+  }
+  .holes span{
+    width:16px; height:16px; border-radius:50%;
+    background:#d9d3c1;
+    box-shadow: inset 0 2px 3px rgba(0,0,0,.35);
+    display:block;
+  }
+  h1.title{
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:52px;
+    color:var(--red);
+    margin:0 0 4px;
+    transform:rotate(-1deg);
+  }
+  .subtitle{
+    font-family:'Caveat',cursive;
+    font-size:24px;
+    color:var(--ink2);
+    margin:0 0 20px;
+    transform:rotate(-0.5deg);
+  }
+  .underline{
+    border:none; height:0; border-top:2px solid var(--ink2);
+    width:260px; margin:-8px 0 22px;
+    transform:rotate(-0.6deg);
+    opacity:.7;
+  }
+  h2{
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:34px;
+    color:var(--red);
+    margin:34px 0 10px;
+    transform:rotate(-0.4deg);
+    border-bottom: 2px dashed rgba(168,54,44,.4);
+    display:inline-block;
+    padding-bottom:2px;
+  }
+  h3{
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:25px;
+    color:var(--ink2);
+    margin:18px 0 6px;
+  }
+  p, li{
+    font-size:18px;
+    line-height:34px;
+    margin:0 0 4px;
+  }
+  .hi{ background:var(--highlight); padding:0 3px; }
+  .hi-red{ background:var(--highlight2); padding:0 3px; }
+  .arrow{ color:var(--red); font-weight:700; }
+  .term{ color:var(--ink2); font-weight:700; }
+  .box{
+    border:2px solid var(--ink2);
+    border-radius:10px 60px 12px 55px / 40px 12px 60px 12px;
+    padding:12px 16px;
+    margin:10px 0 18px;
+    background:rgba(255,255,255,.35);
+    transform:rotate(-0.3deg);
+  }
+  .box .box-title{
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:22px;
+    color:var(--red);
+    margin:0 0 6px;
+  }
+  ul{ margin:6px 0 6px 22px; padding:0; }
+  li{ margin-bottom:2px; }
+  li::marker{ color:var(--red); }
+  .qa{ margin-bottom:16px; }
+  .q{
+    font-family:'Caveat',cursive;
+    font-weight:700;
+    font-size:23px;
+    color:var(--red);
+  }
+  .a{ padding-left:14px; border-left:2px solid var(--line); margin-left:4px; }
+  .sticky{
+    display:inline-block;
+    background:#fff3a8;
+    padding:8px 12px;
+    font-family:'Caveat',cursive;
+    font-size:20px;
+    transform:rotate(2deg);
+    box-shadow:2px 3px 6px rgba(0,0,0,.2);
+    margin:8px 6px 8px 0;
+  }
+  .sticky.pink{ background:#ffd6e0; transform:rotate(-2deg); }
+  .sticky.green{ background:#d7f0d0; transform:rotate(1.5deg); }
+  table{
+    border-collapse:collapse;
+    width:100%;
+    margin:8px 0 18px;
+    font-size:17px;
+  }
+  td, th{
+    border:1.5px solid rgba(32,48,74,.35);
+    padding:6px 10px;
+    text-align:left;
+  }
+  th{ font-family:'Caveat',cursive; font-size:21px; color:var(--ink2); }
+  .star::before{ content:'★ '; color:var(--red); }
+  .roadmap{
+    font-size:17px;
+    line-height:30px;
+    white-space:pre;
+    font-family:'Kalam',cursive;
+    background:rgba(255,255,255,.3);
+    border:2px dashed var(--ink2);
+    padding:14px 16px;
+    border-radius:8px;
+    overflow-x:auto;
+    transform:rotate(-0.2deg);
+  }
+  .doodle-check{ color:var(--green); }
+  .pagefoot{
+    text-align:right;
+    font-family:'Caveat',cursive;
+    font-size:20px;
+    color:var(--ink2);
+    opacity:.6;
+    margin-top:10px;
+  }
+  .circle{
+    display:inline-block;
+    border:2.5px solid var(--red);
+    border-radius:50%;
+    padding:1px 10px;
+    transform:rotate(-3deg);
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <div class="holes"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+  <h1 class="title">RAG Course — my notes 📓</h1>
+  <div class="subtitle">key concepts + interview prep, in my own words</div>
+  <hr class="underline">
+
+  <h2>1. Level 1 — the basics</h2>
+  <div class="box">
+    <div class="box-title">RAG</div>
+    <p>= Retrieval-<span class="hi">Augmented</span> Generation. Basically: let the AI <span class="term">read my docs</span> before it answers, instead of just guessing from training data.</p>
+  </div>
+  <ul>
+    <li><span class="term">Embeddings</span> — turn text into numbers so AI can compare meaning, not just words</li>
+    <li><span class="term">Vector store</span> — a database that holds those numbers, searchable fast</li>
+    <li><span class="term">Chunking</span> — cut big docs into small pieces (the model can't read forever!)</li>
+    <li><span class="term">Similarity search</span> = <span class="hi">semantic search</span> → find the closest-meaning chunks</li>
+    <li><span class="term">Prompt</span> — the instruction I give the model</li>
+    <li><span class="term">LLM</span> — the "brain" (GPT etc.)</li>
+    <li><span class="term">Context window</span> — how much it can read at once <span class="arrow">⚠ has a hard limit</span></li>
+  </ul>
+
+  <h2>2. Level 2 — intermediate</h2>
+  <p><span class="term">Tool calling</span> <span class="arrow">→</span> model picks + uses outside functions on its own (calculator, DB lookup, search…)</p>
+  <p><span class="term">Router query engine</span> <span class="arrow">→</span> decides HOW to search depending on the question type</p>
+  <p><span class="term">Agent</span> <span class="arrow">→</span> plans, uses tools, thinks step by step (not one-shot!)</p>
+  <p><span class="term">ReAct loop</span> <span class="arrow">→</span> Reason → Act → Observe → repeat</p>
+  <p><span class="term">Summary index</span> = reads ALL chunks &nbsp;|&nbsp; <span class="term">Vector index</span> = only top matches</p>
+  <p><span class="term">Multi-doc RAG</span> <span class="arrow">→</span> search across many documents at once</p>
+
+  <div class="pagefoot">pg. 1</div>
+</div>
+
+<div class="page">
+  <div class="holes"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+  <h2>3. Level 3 — advanced (the impressive stuff)</h2>
+  <ul>
+    <li><span class="term">Chunk size tuning</span> — too big = slow + wastes context, too small = loses meaning</li>
+    <li><span class="term">Chunk overlap</span> — repeat a bit of prev. chunk so meaning at the edges isn't lost</li>
+    <li><span class="term">Re-ranking</span> — after search, re-sort results by actual relevance (cross-encoder)</li>
+    <li><span class="hi-red">Hallucination</span> — AI makes stuff up instead of using my docs <span class="arrow">← big interview topic!</span></li>
+    <li><span class="term">Guardrails</span> — rules that stop bad/wrong answers</li>
+    <li><span class="term">Fine-tuning</span> — actually retrain the model on my data</li>
+    <li><span class="term">Self-RAG</span> — model double-checks its own answer against retrieved docs</li>
+  </ul>
+
+  <span class="sticky">chunk = 512–1024 tokens typical</span>
+  <span class="sticky pink">overlap ≈ 50–100 tokens</span>
+
+  <h2>4. The full pipeline (Q5 answer, memorize this!)</h2>
+  <div class="box">
+    <div class="box-title">3 stages</div>
+    <p><b>①  Ingestion</b> — load docs → chunk → embed → store in vector DB</p>
+    <p><b>②  Retrieval</b> — question → embed it → search DB → get top-K chunks</p>
+    <p><b>③  Generation</b> — feed chunks + question to LLM → answer grounded in context</p>
+  </div>
+
+  <h2>5. Interview Q&amp;A — quick answers</h2>
+
+  <div class="qa">
+    <div class="q">Q: Simple RAG vs Agent?</div>
+    <div class="a"><p>Simple RAG = search → context → answer (one shot).<br>Agent = think → pick tool → act → observe → think again... loops till done. Can use multiple tools + multiple searches.</p></div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q: Keyword vs semantic search?</div>
+    <div class="a"><p><span class="term">Keyword</span> = exact word match only. <span class="term">Semantic</span> = matches by meaning ("ML" ≈ "machine learning"). Best practice <span class="arrow">→</span> <span class="hi">hybrid search</span> (both together).</p></div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q: How to stop hallucinations?</div>
+    <div class="a">
+      <ul>
+        <li>tell model "only answer from context"</li>
+        <li>Self-RAG — check answer vs retrieved docs</li>
+        <li>force citations to source chunk</li>
+        <li>re-rank so best chunks are used</li>
+        <li>temperature = 0 for factual answers</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="qa">
+    <div class="q">Q: Choosing chunk size?</div>
+    <div class="a"><p>Small (256–512) → precise Q&amp;A. Large (1024–2048) → summaries, more context kept. Add overlap so boundary info isn't lost. Honestly — just test on real data.</p></div>
+  </div>
+
+  <div class="pagefoot">pg. 2</div>
+</div>
+
+<div class="page">
+  <div class="holes"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+  <div class="qa">
+    <div class="q">Q: Build RAG for 10,000 company docs — how?</div>
+    <div class="a">
+      <ul>
+        <li>ingest w/ good chunking</li>
+        <li>scalable vector DB (Pinecone / Weaviate)</li>
+        <li>metadata filters — date, dept, doc type</li>
+        <li>router for different query types</li>
+        <li>multi-doc agents for cross-doc Qs</li>
+        <li>re-ranking for quality</li>
+        <li>monitor + eval w/ user feedback</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>6. cheat sheet — "if interviewer says ___, they mean ___"</h2>
+  <table>
+    <tr><th>they say</th><th>they mean</th></tr>
+    <tr><td>"ground the LLM's responses"</td><td>use RAG for real context</td></tr>
+    <tr><td>"prevent hallucinations"</td><td>RAG + guardrails + Self-RAG</td></tr>
+    <tr><td>"handle large documents"</td><td>chunking + embeddings + vector search</td></tr>
+    <tr><td>"AI knows which tool to use?"</td><td>function / tool calling</td></tr>
+    <tr><td>"handle different query types"</td><td>router engine</td></tr>
+    <tr><td>"how does the agent think?"</td><td>ReAct loop</td></tr>
+    <tr><td>"scale to many documents"</td><td>multi-doc agents + vector DB + metadata filter</td></tr>
+  </table>
+
+  <div class="circle">remember: examples of vector DBs — Pinecone, Weaviate, ChromaDB, FAISS</div>
+
+  <h2>7. where this is actually used</h2>
+  <p><span class="doodle-check">✓</span> internal knowledge bots (Confluence/Slack search) &nbsp; <span class="doodle-check">✓</span> legal doc search &nbsp; <span class="doodle-check">✓</span> customer support bots &nbsp; <span class="doodle-check">✓</span> AI tutors &nbsp; <span class="doodle-check">✓</span> finance report analysis</p>
+  <p class="star">roles that want this: AI/ML engineer, LLM engineer, data engineer, backend + full-stack dev, solutions architect</p>
+
+  <h2>8. what to learn next</h2>
+  <div class="roadmap">✔ RAG basics (done — this course!)
+    ✔ embeddings & vector search
+    ✔ tool calling / router / agent loop
+
+→ NEXT:
+    - pick a vector DB (Pinecone / ChromaDB / Weaviate)
+    - learn LangChain
+    - advanced chunking strategies
+    - evaluate RAG w/ RAGAS
+    - build "chat with PDF" project
+
+🚀 LATER:
+    - fine-tuning
+    - multi-modal RAG (images + text)
+    - graph RAG
+    - deploy w/ FastAPI + Docker
+    - cost optimization / caching</div>
+
+  <span class="sticky green">💡 pro tip: just build "chat with your PDF" — it covers almost everything!</span>
+
+  <div class="pagefoot">pg. 3 — end of notes</div>
+</div>
+
+</body>
+</html>
